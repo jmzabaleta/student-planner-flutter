@@ -1,8 +1,9 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 import 'dashboard_screen.dart';
 import 'horario_screen.dart';
 import 'notas_screen.dart';
+import 'profile_screen.dart';
 import 'recordatorios_screen.dart';
 import 'tareas_screen.dart';
 
@@ -15,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  bool _isVisible = false;
 
   final List<Widget> _screens = const [
     DashboardScreen(),
@@ -25,13 +27,57 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() => _isVisible = true);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
+        title: Text(
+          'Gaara',
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: _openProfileScreen,
+            icon: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(Icons.person_outline, color: colorScheme.primary),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: SafeArea(
-        child: IndexedStack(
-          index: _currentIndex,
-          children: _screens,
+        child: AnimatedSlide(
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOutQuad,
+          offset: _isVisible ? Offset.zero : const Offset(0, 0.03),
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 380),
+            opacity: _isVisible ? 1 : 0,
+            child: IndexedStack(index: _currentIndex, children: _screens),
+          ),
         ),
       ),
       bottomNavigationBar: Padding(
@@ -41,43 +87,39 @@ class _HomeScreenState extends State<HomeScreen> {
           child: NavigationBarTheme(
             data: NavigationBarThemeData(
               height: 72,
-              backgroundColor: Colors.white,
-              indicatorColor: const Color(0xFFDEE9FF),
-              labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
-                (states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E3A5F),
-                    );
-                  }
-                  return const TextStyle(
+              backgroundColor: colorScheme.surface,
+              indicatorColor: colorScheme.primary.withValues(alpha: 0.14),
+              labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((
+                states,
+              ) {
+                if (states.contains(WidgetState.selected)) {
+                  return TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF7B8794),
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.primary,
                   );
-                },
-              ),
-              iconTheme: WidgetStateProperty.resolveWith<IconThemeData>(
-                (states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return const IconThemeData(
-                      color: Color(0xFF1E3A5F),
-                      size: 24,
-                    );
-                  }
-                  return const IconThemeData(
-                    color: Color(0xFF7B8794),
-                    size: 22,
-                  );
-                },
-              ),
+                }
+                return TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.onSurface.withValues(alpha: 0.64),
+                );
+              }),
+              iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((
+                states,
+              ) {
+                if (states.contains(WidgetState.selected)) {
+                  return IconThemeData(color: colorScheme.primary, size: 24);
+                }
+                return IconThemeData(
+                  color: colorScheme.onSurface.withValues(alpha: 0.64),
+                  size: 22,
+                );
+              }),
             ),
             child: NavigationBar(
               selectedIndex: _currentIndex,
-              labelBehavior:
-                  NavigationDestinationLabelBehavior.alwaysShow,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
               onDestinationSelected: (index) {
                 setState(() => _currentIndex = index);
               },
@@ -112,6 +154,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _openProfileScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ProfileScreen()),
     );
   }
 }

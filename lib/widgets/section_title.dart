@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import '../core/theme/app_colors.dart';
+
 import '../core/theme/app_spacing.dart';
-import '../core/theme/app_text_styles.dart';
 
 class SectionTitle extends StatelessWidget {
   final String title;
   final String subtitle;
-  final Widget? action; // opcional (botón, icono, etc.)
+  final Widget? action;
 
   const SectionTitle({
     super.key,
@@ -17,6 +16,9 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -26,21 +28,23 @@ class SectionTitle extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: AppTextStyles.title,
+                style: textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 subtitle,
-                style: AppTextStyles.subtitle,
+                style: textTheme.bodyMedium?.copyWith(
+                  height: 1.55,
+                  fontWeight: FontWeight.w500,
+                  color: scheme.onSurface.withValues(alpha: 0.68),
+                ),
               ),
             ],
           ),
         ),
-
-        if (action != null) ...[
-          const SizedBox(width: AppSpacing.sm),
-          action!,
-        ]
+        if (action != null) ...[const SizedBox(width: AppSpacing.sm), action!],
       ],
     );
   }

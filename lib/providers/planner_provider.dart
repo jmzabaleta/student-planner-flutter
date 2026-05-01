@@ -4,12 +4,14 @@ import '../models/clase.dart';
 import '../models/nota.dart';
 import '../models/recordatorio.dart';
 import '../models/tarea.dart';
+import '../services/local_storage_service.dart';
 
 class PlannerProvider extends ChangeNotifier {
-  final List<Clase> _clases = [];
-  final List<Nota> _notas = [];
-  final List<Tarea> _tareas = [];
-  final List<Recordatorio> _recordatorios = [];
+  List<Clase> _clases = [];
+  List<Nota> _notas = [];
+  List<Tarea> _tareas = [];
+  List<Recordatorio> _recordatorios = [];
+  Future<void>? _loadingData;
 
   List<Clase> get clases => List.unmodifiable(_clases);
   List<Nota> get notas => List.unmodifiable(_notas);
@@ -24,90 +26,192 @@ class PlannerProvider extends ChangeNotifier {
       List<Recordatorio>.from(_recordatorios)
         ..sort((a, b) => a.fecha.compareTo(b.fecha));
 
-  void seedData() {
-    if (_clases.isNotEmpty) return;
+  PlannerProvider() {
+    _loadingData = _loadData();
+  }
 
-    _clases.addAll([
-      Clase(
-        id: '1',
-        materia: 'Bases de Datos',
-        salon: 'A-203',
-        profesor: 'Ing. Ramírez',
-        dia: 'Lunes',
-        horaInicio: '08:00',
-        horaFin: '10:00',
-      ),
-      Clase(
-        id: '2',
-        materia: 'Programación',
-        salon: 'B-101',
-        profesor: 'Ing. Torres',
-        dia: 'Martes',
-        horaInicio: '10:00',
-        horaFin: '12:00',
-      ),
-    ]);
+  Future<void> loadData() async {
+    final currentLoad = _loadingData;
+    if (currentLoad != null) {
+      await currentLoad;
+      return;
+    }
 
-    _notas.add(
-      Nota(
-        id: '1',
-        titulo: 'Repasar parcial',
-        contenido: 'Estudiar normal, binomial y ejercicios de inferencia.',
-        fecha: DateTime.now(),
-      ),
+    _loadingData = _loadData();
+    await _loadingData;
+  }
+
+  Future<void> _loadData() async {
+    final clasesData = await LocalStorageService.loadList('clases');
+    final notasData = await LocalStorageService.loadList('notas');
+    final tareasData = await LocalStorageService.loadList('tareas');
+    final recordatoriosData = await LocalStorageService.loadList(
+      'recordatorios',
     );
 
-    _tareas.addAll([
-      Tarea(
-        id: '1',
-        titulo: 'Taller de SQL',
-        materia: 'Bases de Datos',
-        fechaEntrega: DateTime.now().add(const Duration(days: 2)),
-      ),
-      Tarea(
-        id: '2',
-        titulo: 'Mapa conceptual',
-        materia: 'Ingeniería de Software',
-        fechaEntrega: DateTime.now().add(const Duration(days: 4)),
-      ),
-    ]);
+    _clases = clasesData
+        .map((e) => Clase.fromMap(Map<String, dynamic>.from(e)))
+        .toList();
 
-    _recordatorios.add(
-      Recordatorio(
-        id: '1',
-        titulo: 'Llevar USB',
-        descripcion: 'Guardar presentación antes de salir.',
-        fecha: DateTime.now().add(const Duration(hours: 12)),
-      ),
-    );
+    _notas = notasData
+        .map((e) => Nota.fromMap(Map<String, dynamic>.from(e)))
+        .toList();
 
+    _tareas = tareasData
+        .map((e) => Tarea.fromMap(Map<String, dynamic>.from(e)))
+        .toList();
+
+    _recordatorios = recordatoriosData
+        .map((e) => Recordatorio.fromMap(Map<String, dynamic>.from(e)))
+        .toList();
+
+    _loadingData = null;
     notifyListeners();
   }
 
-  void addClase(Clase clase) {
+  Future<void> _ensureLoaded() async {
+    final currentLoad = _loadingData;
+    if (currentLoad != null) {
+      await currentLoad;
+    }
+  }
+
+  Future<void> _saveClases() async {
+    await LocalStorageService.saveList(
+      'clases',
+      _clases.map((e) => e.toMap()).toList(),
+    );
+  }
+
+  Future<void> _saveNotas() async {
+    await LocalStorageService.saveList(
+      'notas',
+      _notas.map((e) => e.toMap()).toList(),
+    );
+  }
+
+  Future<void> _saveTareas() async {
+    await LocalStorageService.saveList(
+      'tareas',
+      _tareas.map((e) => e.toMap()).toList(),
+    );
+  }
+
+  Future<void> _saveRecordatorios() async {
+    await LocalStorageService.saveList(
+      'recordatorios',
+      _recordatorios.map((e) => e.toMap()).toList(),
+    );
+  }
+
+  Future<void> addClase(Clase clase) async {
+    await _ensureLoaded();
     _clases.add(clase);
+    await _saveClases();
     notifyListeners();
   }
 
-  void addNota(Nota nota) {
-    _notas.insert(0, nota);
+  Future<void> deleteClase(String id) async {
+    await _ensureLoaded();
+    _clases.removeWhere((c) => c.id == id);
+    await _saveClases();
     notifyListeners();
   }
 
-  void addTarea(Tarea tarea) {
+  Future<void> updateClase(Clase claseActualizada) async {
+    await _ensureLoaded();
+    final index = _clases.indexWhere((c) => c.id == claseActualizada.id);
+    if (index == -1) return;
+
+    _clases[index] = claseActualizada;
+    await _saveClases();
+    notifyListeners();
+  }
+
+  Future<void> addTarea(Tarea tarea) async {
+    await _ensureLoaded();
     _tareas.add(tarea);
+    await _saveTareas();
     notifyListeners();
   }
 
-  void toggleTarea(String id) {
+  Future<void> deleteTarea(String id) async {
+    await _ensureLoaded();
+    _tareas.removeWhere((t) => t.id == id);
+    await _saveTareas();
+    notifyListeners();
+  }
+
+  Future<void> updateTarea(Tarea tareaActualizada) async {
+    await _ensureLoaded();
+    final index = _tareas.indexWhere((t) => t.id == tareaActualizada.id);
+    if (index == -1) return;
+
+    _tareas[index] = tareaActualizada;
+    await _saveTareas();
+    notifyListeners();
+  }
+
+  Future<void> toggleTarea(String id) async {
+    await _ensureLoaded();
     final index = _tareas.indexWhere((t) => t.id == id);
     if (index == -1) return;
-    _tareas[index].completada = !_tareas[index].completada;
+
+    _tareas[index] = _tareas[index].copyWith(
+      completada: !_tareas[index].completada,
+    );
+
+    await _saveTareas();
     notifyListeners();
   }
 
-  void addRecordatorio(Recordatorio recordatorio) {
+  Future<void> addRecordatorio(Recordatorio recordatorio) async {
+    await _ensureLoaded();
     _recordatorios.add(recordatorio);
+    await _saveRecordatorios();
+    notifyListeners();
+  }
+
+  Future<void> deleteRecordatorio(String id) async {
+    await _ensureLoaded();
+    _recordatorios.removeWhere((r) => r.id == id);
+    await _saveRecordatorios();
+    notifyListeners();
+  }
+
+  Future<void> updateRecordatorio(Recordatorio recordatorioActualizado) async {
+    await _ensureLoaded();
+    final index = _recordatorios.indexWhere(
+      (r) => r.id == recordatorioActualizado.id,
+    );
+    if (index == -1) return;
+
+    _recordatorios[index] = recordatorioActualizado;
+    await _saveRecordatorios();
+    notifyListeners();
+  }
+
+  Future<void> addNota(Nota nota) async {
+    await _ensureLoaded();
+    _notas.insert(0, nota);
+    await _saveNotas();
+    notifyListeners();
+  }
+
+  Future<void> deleteNota(String id) async {
+    await _ensureLoaded();
+    _notas.removeWhere((n) => n.id == id);
+    await _saveNotas();
+    notifyListeners();
+  }
+
+  Future<void> updateNota(Nota notaActualizada) async {
+    await _ensureLoaded();
+    final index = _notas.indexWhere((n) => n.id == notaActualizada.id);
+    if (index == -1) return;
+
+    _notas[index] = notaActualizada;
+    await _saveNotas();
     notifyListeners();
   }
 }
