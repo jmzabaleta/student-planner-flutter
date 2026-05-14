@@ -42,31 +42,41 @@ class PlannerProvider extends ChangeNotifier {
   }
 
   Future<void> _loadData() async {
-    final clasesData = await LocalStorageService.loadList('clases');
-    final notasData = await LocalStorageService.loadList('notas');
-    final tareasData = await LocalStorageService.loadList('tareas');
-    final recordatoriosData = await LocalStorageService.loadList(
-      'recordatorios',
-    );
+    try {
+      final clasesData = await LocalStorageService.loadList('clases');
+      final notasData = await LocalStorageService.loadList('notas');
+      final tareasData = await LocalStorageService.loadList('tareas');
+      final recordatoriosData = await LocalStorageService.loadList(
+        'recordatorios',
+      );
 
-    _clases = clasesData
-        .map((e) => Clase.fromMap(Map<String, dynamic>.from(e)))
-        .toList();
+      _clases = _parseItems(clasesData, Clase.fromMap);
+      _notas = _parseItems(notasData, Nota.fromMap);
+      _tareas = _parseItems(tareasData, Tarea.fromMap);
+      _recordatorios = _parseItems(recordatoriosData, Recordatorio.fromMap);
+    } finally {
+      _loadingData = null;
+      notifyListeners();
+    }
+  }
 
-    _notas = notasData
-        .map((e) => Nota.fromMap(Map<String, dynamic>.from(e)))
-        .toList();
+  List<T> _parseItems<T>(
+    List<dynamic> data,
+    T Function(Map<String, dynamic> map) fromMap,
+  ) {
+    final items = <T>[];
 
-    _tareas = tareasData
-        .map((e) => Tarea.fromMap(Map<String, dynamic>.from(e)))
-        .toList();
+    for (final value in data) {
+      if (value is! Map) continue;
 
-    _recordatorios = recordatoriosData
-        .map((e) => Recordatorio.fromMap(Map<String, dynamic>.from(e)))
-        .toList();
+      try {
+        items.add(fromMap(Map<String, dynamic>.from(value)));
+      } catch (_) {
+        continue;
+      }
+    }
 
-    _loadingData = null;
-    notifyListeners();
+    return items;
   }
 
   Future<void> _ensureLoaded() async {

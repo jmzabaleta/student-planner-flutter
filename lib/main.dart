@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_colors.dart';
 import 'providers/planner_provider.dart';
 import 'providers/settings_provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
   runApp(const StudentPlannerApp());
@@ -28,7 +28,7 @@ class StudentPlannerApp extends StatelessWidget {
             themeMode: settings.themeMode,
             theme: _buildTheme(Brightness.light),
             darkTheme: _buildTheme(Brightness.dark),
-            home: const HomeScreen(),
+            home: const SplashScreen(),
           );
         },
       ),
@@ -79,6 +79,38 @@ class StudentPlannerApp extends StatelessWidget {
         color: colorScheme.surface,
         margin: const EdgeInsets.symmetric(vertical: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: colorScheme.surfaceContainerHighest,
+        selectedColor: colorScheme.primary.withValues(alpha: 0.14),
+        checkmarkColor: colorScheme.primary,
+        side: BorderSide(color: colorScheme.outline),
+        labelStyle: TextStyle(
+          color: colorScheme.onSurface,
+          fontWeight: FontWeight.w700,
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          side: WidgetStatePropertyAll(BorderSide(color: colorScheme.outline)),
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return colorScheme.primary.withValues(alpha: 0.12);
+            }
+            return colorScheme.surface;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return colorScheme.primary;
+            }
+            return colorScheme.onSurface.withValues(alpha: 0.68);
+          }),
+          textStyle: const WidgetStatePropertyAll(
+            TextStyle(fontWeight: FontWeight.w800),
+          ),
+        ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,

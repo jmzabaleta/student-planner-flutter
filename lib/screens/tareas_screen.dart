@@ -92,6 +92,7 @@ class _TareasScreenState extends State<TareasScreen> {
           right: 16,
           bottom: 16,
           child: FloatingActionButton.extended(
+            heroTag: 'fab-tareas',
             onPressed: () => _showTaskSheet(context),
             icon: const Icon(Icons.add_task_rounded),
             label: const Text(

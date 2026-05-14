@@ -1,17 +1,37 @@
-# gaara
+# Gaara Planner
 
-A new Flutter project.
+App Flutter para organizar clases, tareas, recordatorios y notas desde el dispositivo.
 
-## Getting Started
+## Preparar release para Play Store
 
-This project is a starting point for a Flutter application.
+1. Verifica que Flutter este instalado y disponible en la terminal:
 
-A few resources to get you started if this is your first Flutter project:
+   ```bash
+   flutter doctor
+   ```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+2. Genera el keystore de produccion:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+   ```bash
+   keytool -genkey -v -keystore android/app/gaara-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias gaara
+   ```
+
+3. Copia `android/key.properties.example` como `android/key.properties` y reemplaza los passwords reales.
+
+4. Sube el version code antes de cada publicacion en `pubspec.yaml`, por ejemplo:
+
+   ```yaml
+   version: 1.0.1+2
+   ```
+
+5. Compila el Android App Bundle:
+
+   ```bash
+   flutter clean
+   flutter pub get
+   flutter analyze
+   flutter test
+   flutter build appbundle --release
+   ```
+
+El archivo para Play Console queda en `build/app/outputs/bundle/release/app-release.aab`.

@@ -37,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -46,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(
           'Gaara',
           style: TextStyle(
-            fontSize: 26,
+            fontSize: 24,
             fontWeight: FontWeight.w800,
             letterSpacing: 0,
             color: colorScheme.onSurface,
@@ -80,76 +81,93 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
-          child: NavigationBarTheme(
-            data: NavigationBarThemeData(
-              height: 72,
-              backgroundColor: colorScheme.surface,
-              indicatorColor: colorScheme.primary.withValues(alpha: 0.14),
-              labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((
-                states,
-              ) {
-                if (states.contains(WidgetState.selected)) {
-                  return TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: colorScheme.primary,
-                  );
-                }
-                return TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: colorScheme.onSurface.withValues(alpha: 0.64),
-                );
-              }),
-              iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((
-                states,
-              ) {
-                if (states.contains(WidgetState.selected)) {
-                  return IconThemeData(color: colorScheme.primary, size: 24);
-                }
-                return IconThemeData(
-                  color: colorScheme.onSurface.withValues(alpha: 0.64),
-                  size: 22,
-                );
-              }),
-            ),
-            child: NavigationBar(
-              selectedIndex: _currentIndex,
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              onDestinationSelected: (index) {
-                setState(() => _currentIndex = index);
-              },
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home_rounded),
-                  label: 'Inicio',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.schedule_outlined),
-                  selectedIcon: Icon(Icons.schedule),
-                  label: 'Horario',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.task_alt_outlined),
-                  selectedIcon: Icon(Icons.task_alt),
-                  label: 'Tareas',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.alarm_outlined),
-                  selectedIcon: Icon(Icons.alarm),
-                  label: 'Recordatorios',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.note_alt_outlined),
-                  selectedIcon: Icon(Icons.note_alt),
-                  label: 'Notas',
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(12, 0, 12, bottomInset > 0 ? 8 : 12),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: colorScheme.outline),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
                 ),
               ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: NavigationBarTheme(
+                data: NavigationBarThemeData(
+                  height: 68,
+                  backgroundColor: Colors.transparent,
+                  indicatorColor: colorScheme.primary.withValues(alpha: 0.14),
+                  labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((
+                    states,
+                  ) {
+                    if (states.contains(WidgetState.selected)) {
+                      return TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: colorScheme.primary,
+                      );
+                    }
+                    return TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface.withValues(alpha: 0.62),
+                    );
+                  }),
+                  iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((
+                    states,
+                  ) {
+                    if (states.contains(WidgetState.selected)) {
+                      return IconThemeData(color: colorScheme.primary, size: 23);
+                    }
+                    return IconThemeData(
+                      color: colorScheme.onSurface.withValues(alpha: 0.62),
+                      size: 21,
+                    );
+                  }),
+                ),
+                child: NavigationBar(
+                  selectedIndex: _currentIndex,
+                  labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                  onDestinationSelected: (index) {
+                    setState(() => _currentIndex = index);
+                  },
+                  destinations: const [
+                    NavigationDestination(
+                      icon: Icon(Icons.home_outlined),
+                      selectedIcon: Icon(Icons.home_rounded),
+                      label: 'Inicio',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.schedule_outlined),
+                      selectedIcon: Icon(Icons.schedule),
+                      label: 'Horario',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.task_alt_outlined),
+                      selectedIcon: Icon(Icons.task_alt),
+                      label: 'Tareas',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.alarm_outlined),
+                      selectedIcon: Icon(Icons.alarm),
+                      label: 'Avisos',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.note_alt_outlined),
+                      selectedIcon: Icon(Icons.note_alt),
+                      label: 'Notas',
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

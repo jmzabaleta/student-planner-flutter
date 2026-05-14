@@ -120,6 +120,7 @@ class _RecordatoriosScreenState extends State<RecordatoriosScreen> {
           right: 16,
           bottom: 16,
           child: FloatingActionButton.extended(
+            heroTag: 'fab-recordatorios',
             backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             elevation: 3,

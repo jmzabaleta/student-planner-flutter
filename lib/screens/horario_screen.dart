@@ -88,6 +88,7 @@ class _HorarioScreenState extends State<HorarioScreen> {
           right: 16,
           bottom: 16,
           child: FloatingActionButton.extended(
+            heroTag: 'fab-horario',
             onPressed: () => _showClassSheet(context),
             icon: const Icon(Icons.add_rounded),
             label: const Text(

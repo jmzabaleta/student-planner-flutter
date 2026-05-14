@@ -69,6 +69,7 @@ class NotasScreen extends StatelessWidget {
           right: 16,
           bottom: 16,
           child: FloatingActionButton.extended(
+            heroTag: 'fab-notas',
             onPressed: () => _showNoteDialog(context),
             icon: const Icon(Icons.edit_note),
             label: const Text(
